@@ -1,0 +1,11 @@
+# Ambiente Virtual e Cache do Python
+backend/venv/
+.venv/
+**/__pycache__/
+**venv/
+
+# Arquivos de Modelo Treinado
+*.h5
+backend/kaggle.json
+data/New Plant Diseases Dataset(Augmented)/
+data/test/
