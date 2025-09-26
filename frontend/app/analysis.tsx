@@ -11,7 +11,7 @@ export default function AnalysisScreen() {
     const timer = setTimeout(() => {
       if (imageUri) {
         // Navega para a tela de resultados, passando a imagem
-        router.replace({ pathname: '/(tabs)/results', params: { imageUri } });
+        router.replace({ pathname: '/results', params: { imageUri } });
       }
     }, 3000);
 

@@ -2,20 +2,21 @@ import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'rea
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 
+// Definimos um tipo para a nossa previsão para maior segurança do código
+type Prediction = {
+  prediction: string;
+  confidence: string;
+};
+
 export default function ResultsScreen() {
-  const { imageUri } = useLocalSearchParams<{ imageUri: string }>();
+  const { results: resultsString, imageUri } = useLocalSearchParams<{ results: string, imageUri: string }>();
   const router = useRouter();
 
-  // Dados de exemplo (mock)
-  const analysisResult = {
-    plantName: 'Samambaia (Nephrolepis exaltata)',
-    healthDiagnosis: 'Saudável com leves sinais de desidratação.',
-    careSuggestions: [
-      'Regue de 2 a 3 vezes por semana, mantendo o solo úmido, mas não encharcado.',
-      'Mantenha em um local com luz indireta. A luz solar direta pode queimar as folhas.',
-      'Borrife água nas folhas periodicamente para aumentar a umidade.',
-    ]
-  };
+  // 1. Convertemos a string JSON de volta para um array de objetos
+  const predictions: Prediction[] = resultsString ? JSON.parse(resultsString) : [];
+  
+  // Pegamos a primeira previsão (a mais provável) para destacar
+  const topPrediction = predictions[0];
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -23,22 +24,27 @@ export default function ResultsScreen() {
       
       <Text style={styles.title}>Resultado da Análise</Text>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Espécie Identificada</Text>
-        <Text style={styles.cardContent}>{analysisResult.plantName}</Text>
-      </View>
+      {/* Card para a previsão principal */}
+      {topPrediction && (
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Diagnóstico Principal</Text>
+          <Text style={styles.predictionText}>{topPrediction.prediction}</Text>
+          <Text style={styles.confidenceText}>Confiança: {topPrediction.confidence}</Text>
+        </View>
+      )}
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Diagnóstico de Saúde</Text>
-        <Text style={styles.cardContent}>{analysisResult.healthDiagnosis}</Text>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Sugestões de Cuidado</Text>
-        {analysisResult.careSuggestions.map((suggestion, index) => (
-          <Text key={index} style={styles.suggestionItem}>• {suggestion}</Text>
-        ))}
-      </View>
+      {/* Card para outras possibilidades */}
+      {predictions.length > 1 && (
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Outras Possibilidades</Text>
+          {predictions.slice(1).map((item, index) => (
+            <View key={index} style={styles.otherPossibility}>
+              <Text style={styles.cardContent}>{item.prediction}</Text>
+              <Text style={styles.confidenceText}>{item.confidence}</Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       <TouchableOpacity style={styles.button} onPress={() => router.push('/')}>
         <Text style={styles.buttonText}>Analisar Outra Planta</Text>
@@ -71,8 +77,8 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 15,
         marginBottom: 15,
-        elevation: 2, // Sombra para Android
-        shadowColor: '#000', // Sombra para iOS
+        elevation: 2,
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.22,
         shadowRadius: 2.22,
@@ -87,10 +93,18 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#616161',
     },
-    suggestionItem: {
-        fontSize: 16,
-        color: '#616161',
+    predictionText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#000',
         marginBottom: 5,
+    },
+    confidenceText: {
+        fontSize: 14,
+        color: '#888',
+    },
+    otherPossibility: {
+        marginBottom: 10,
     },
     button: {
       backgroundColor: '#4caf50',

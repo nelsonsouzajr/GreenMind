@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+// 1. IMPORTAR FileSystem da sua nova localização "legacy"
+import { readAsStringAsync, EncodingType } from 'expo-file-system/legacy';
+
+// IMPORTANT: Replace with your computer's local IP address.
+const API_URL = 'http://192.168.15.113:5000/predict';
 
 export default function CaptureScreen() {
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  // Função para escolher imagem da galeria
   const pickImageFromGallery = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -20,8 +25,7 @@ export default function CaptureScreen() {
       setImageUri(result.assets[0].uri);
     }
   };
-  
-  // Função para tirar foto com a câmera
+
   const pickImageFromCamera = async () => {
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
     if (permissionResult.granted === false) {
@@ -39,16 +43,53 @@ export default function CaptureScreen() {
       setImageUri(result.assets[0].uri);
     }
   };
-  
-  // Função para ir para a próxima tela
-  const handleAnalysis = () => {
-    if (imageUri) {
-      Alert.alert("Próximo Passo", "Aqui nós navegaríamos para a tela de análise com a imagem selecionada.");
-      // Futuramente: router.push({ pathname: '/analysis', params: { imageUri } });
+
+  const handleAnalysis = async () => {
+    console.log("Botão clicado! A função handleAnalysis começou.");
+    if (!imageUri) return;
+
+    setIsLoading(true);
+
+    try {
+      // 2. Usar as funções e tipos importados corretamente
+      const base64Image = await readAsStringAsync(imageUri, {
+        encoding: EncodingType.Base64,
+      });
+
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64Image }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Erro na API');
+      }
+
+      router.push({
+        pathname: '/results',
+        params: { results: JSON.stringify(result), imageUri: imageUri },
+      });
+
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Erro", "Não foi possível conectar ao servidor de análise. Verifique se o servidor está rodando e o IP está correto.");
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  if (isLoading) {
+    return (
+        <View style={[styles.container, styles.loadingContainer]}>
+            <ActivityIndicator size="large" color="#4caf50" />
+            <Text style={styles.loadingText}>Analisando sua planta...</Text>
+        </View>
+    );
   }
 
-  // Se nenhuma imagem foi escolhida, mostra os botões de seleção
   if (!imageUri) {
     return (
       <View style={styles.container}>
@@ -65,11 +106,7 @@ export default function CaptureScreen() {
       </View>
     );
   }
-  if (imageUri) {
-    // Navega para a tela de análise passando a URI da imagem como parâmetro
-    router.push({ pathname: '/analysis', params: { imageUri } });
-  }
-  // Se uma imagem foi escolhida, mostra a pré-visualização
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Imagem Selecionada</Text>
@@ -82,7 +119,6 @@ export default function CaptureScreen() {
       </TouchableOpacity>
     </View>
   );
- 
 }
 
 const styles = StyleSheet.create({
@@ -133,5 +169,14 @@ const styles = StyleSheet.create({
       resizeMode: 'contain',
       marginBottom: 20,
       borderRadius: 10,
+    },
+    loadingContainer: {
+        justifyContent: 'center',
+    },
+    loadingText: {
+        marginTop: 20,
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
     }
 });
