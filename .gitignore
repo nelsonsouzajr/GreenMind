@@ -5,7 +5,7 @@ backend/venv/
 **venv/
 
 # Arquivos de Modelo Treinado
-*.h5
+
 backend/kaggle.json
 data/New Plant Diseases Dataset(Augmented)/
 data/test/
