@@ -9,3 +9,7 @@ backend/venv/
 backend/kaggle.json
 data/New Plant Diseases Dataset(Augmented)/
 data/test/
+**rar/
+**zip/
+data/data_species/greenmind_final_dataset/
+data/all_images/

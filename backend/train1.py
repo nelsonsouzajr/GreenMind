@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 import os
 
 # --- 1. CONFIGURAÇÃO ---
-DATASET_PATH = "G:/Cursos/UNIVESP/2025-2/Projeto Integrador/GreenMind/data/New Plant Diseases Dataset(Augmented)/New Plant Diseases Dataset(Augmented)"
+DATASET_PATH = "G:/Cursos/UNIVESP/2025-2/Projeto Integrador/GreenMind/data/greenmind_final_dataset/"
 IMG_SIZE = (224, 224)
 BATCH_SIZE = 32
-INITIAL_EPOCHS = 50
-FINE_TUNE_EPOCHS = 20 # Quantas épocas faremos o ajuste fino
+INITIAL_EPOCHS = 250
+FINE_TUNE_EPOCHS = 75 # Quantas épocas faremos o ajuste fino
 TOTAL_EPOCHS = INITIAL_EPOCHS + FINE_TUNE_EPOCHS
 
 # --- 2. PREPARAÇÃO DOS DADOS ---

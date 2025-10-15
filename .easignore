@@ -1,0 +1,36 @@
+# Ignorar backend (não necessário para build mobile)
+backend/
+*.py
+*.ipynb
+
+# Ignorar ambientes virtuais e dependências pesadas
+.venv/
+env/
+__pycache__/
+*.pkl
+*.h5
+*.pt
+*.onnx
+*.csv
+*.zip
+*.tar
+*.gz
+
+# Ignorar configurações e arquivos temporários
+node_modules/
+.expo/
+.expo-shared/
+dist/
+build/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.bak
+
+# Ignorar IDEs e ferramentas locais
+.vscode/
+.idea/
+.cursor/
+.git/
+.gitignore
